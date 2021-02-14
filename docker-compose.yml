@@ -52,6 +52,18 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin", "ping"]
 
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: tdd-pma
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+    ports:
+      - '7999:80'
+    networks:
+      - laracasts-network
+
   redis:
     image: 'redis:alpine'
     container_name: tdd-redis

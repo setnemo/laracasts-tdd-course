@@ -7,16 +7,16 @@ ARGS = $(filter-out $@,$(MAKECMDGOALS))
 .EXPORT_ALL_VARIABLES: ;
 Makefile: ;
 
-.PHONY: up
+.PHONY:
 up: network
 	docker-compose up -d
 
 .PHONY: mysql
-mysql: up
+mysql:
 	docker-compose exec mysql mysql -u root -p
 
 .PHONY: redis
-redis: up
+redis:
 	docker-compose exec redis redis-cli ${ARGS}
 
 .PHONY: stop
@@ -24,19 +24,19 @@ stop:
 	docker-compose stop ${ARGS}
 
 .PHONY: redis-m
-redis-m: up
+redis-m:
 	docker-compose exec redis redis-cli MONITOR
 
 .PHONY: tinker
-tinker: up
+tinker:
 	docker-compose exec app php artisan tinker
 
 .PHONY: migrate
-migrate: up
+migrate:
 	docker-compose exec app php artisan migrate
 
 .PHONY: artisan
-artisan: up
+artisan:
 	docker-compose exec app php artisan ${ARGS}
 
 .PHONY: help
