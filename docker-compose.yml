@@ -1,0 +1,75 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: digitalocean.com/php
+    container_name: tdd-app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - laracasts-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: tdd-nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/app
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - laracasts-network
+
+  mysql:
+    image: mysql:5.7.22
+    container_name: tdd-mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - laracasts-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+
+  redis:
+    image: 'redis:alpine'
+    container_name: tdd-redis
+    ports:
+      - '${REDIS_PORT}'
+    volumes:
+      - 'redisdata:/data'
+    networks:
+      - laracasts-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+volumes:
+  dbdata:
+    driver: local
+  redisdata:
+    driver: local
+
+networks:
+  laracasts-network:
+    driver: bridge
